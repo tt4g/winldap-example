@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.4.0)
-
 #[=======================================================================[.rst:
 FindWldap32
 -----------
@@ -64,70 +62,50 @@ This module will set the following variables if found:
 
 #]=======================================================================]
 
-function(__wldap32_detect_windows_sdk_dir value)
-  # Custom Windows 10 SDK directory.
-  # https://cmake.org/cmake/help/latest/variable/CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION.html
-  if(DEFINED ENV{CMAKE_WINDOWS_KITS_10_DIR})
-    set(${value} "$ENV{CMAKE_WINDOWS_KITS_10_DIR}" PARENT_SCOPE)
-  endif()
+# Custom Windows 10 SDK directory.
+# https://cmake.org/cmake/help/latest/variable/CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION.html
+if(DEFINED ENV{CMAKE_WINDOWS_KITS_10_DIR})
+  set(Wldap32_WINDOWS_SDK_DIR "$ENV{CMAKE_WINDOWS_KITS_10_DIR}")
 
-  # The environment variable `WindowsSdkDir` provided by MSVC.
-  if(DEFINED ENV{WindowsSdkDir})
-    set(${value} "$ENV{WindowsSdkDir}" PARENT_SCOPE)
-  endif()
-endfunction()
+# The environment variable `WindowsSdkDir` provided by MSVC.
+elseif(DEFINED ENV{WindowsSdkDir})
+  set(Wldap32_WINDOWS_SDK_DIR "$ENV{WindowsSdkDir}")
+endif()
 
-function(__wldap32_detect_windows_sdk_version value)
-  if(DEFINED CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
-    set(${value} ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION} PARENT_SCOPE)
-    return()
-  endif()
+if(DEFINED CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION)
+  set(Wldap32_WINDOWS_SDK_VERSION ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
 
   # The environment variable `WindowsSDKVersion` is not required.
   # This is because the environment variable `Lib` provided by MSVC contains the
   # directory where the library of the Windows SDK of the corresponding version
   # exists, and is included in the search range of `find_path` and `find_library`.
   #
-  # if(DEFINED ENV{WindowsSDKVersion})
-  #   set(__WindowsSDKVersion "$ENV{WindowsSDKVersion}")
-  #   # Delete last backslash in environment variable `WindowsSDKVersion`.
-  #   # e.g. 10.0.xxxxx.x\
-  #   #                  ^
-  #   string(REGEX REPLACE "\\\\" "" __WindowsSDKVersion "${__WindowsSDKVersion}")
-  #   set(${value} ${__WindowsSDKVersion} PARENT_SCOPE)
-  #
-  #   return()
-  # endif()
+# elseif(DEFINED ENV{WindowsSDKVersion})
+#   set(Wldap32_WINDOWS_SDK_VERSION "$ENV{WindowsSDKVersion}")
+#   # Delete last backslash in environment variable `WindowsSDKVersion`.
+#   # e.g. 10.0.xxxxx.x\
+#   #                  ^
+#   string(REGEX REPLACE "\\\\" "" Wldap32_WINDOWS_SDK_VERSION "${Wldap32_WINDOWS_SDK_VERSION}")
 
-  if(WIN32)
-    # If the target platform is `WIN32`, the variable `CMAKE_SYSTEM_VERSION`
-    # is the target Windows version. This should match the Windows SDK version.
-    set(${value} ${CMAKE_SYSTEM_VERSION} PARENT_SCOPE)
-  endif()
-endfunction()
+elseif(WIN32)
+  # If the target platform is `WIN32`, the variable `CMAKE_SYSTEM_VERSION`
+  # is the target Windows version. This should match the Windows SDK version.
+  set(Wldap32_WINDOWS_SDK_VERSION ${CMAKE_SYSTEM_VERSION})
+endif()
 
-function(__wldap32_detect_windows_sdk_arch value)
-
-  if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "ARM")
-    if(CMAKE_CL_64)
-      set(WINDOWS_SDK_ARCH arm64)
-    else()
-      set(WINDOWS_SDK_ARCH arm)
-    endif()
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "ARM")
+  if(CMAKE_CL_64)
+    set(Wldap32_TARGERT_ARCH arm64)
   else()
-    if(CMAKE_CL_64)
-      set(WINDOWS_SDK_ARCH x64)
-    else()
-      set(WINDOWS_SDK_ARCH x86)
-    endif()
+    set(Wldap32_TARGERT_ARCH arm)
   endif()
-
-  set(${value} ${WINDOWS_SDK_ARCH} PARENT_SCOPE)
-endfunction()
-
-__wldap32_detect_windows_sdk_dir(Wldap32_WINDOWS_SDK_DIR)
-__wldap32_detect_windows_sdk_version(Wldap32_WINDOWS_SDK_VERSION)
-__wldap32_detect_windows_sdk_arch(Wldap32_TARGERT_ARCH)
+else()
+  if(CMAKE_CL_64)
+    set(Wldap32_TARGERT_ARCH x64)
+  else()
+    set(Wldap32_TARGERT_ARCH x86)
+  endif()
+endif()
 
 set(Wldap32_INCLUDE_SUFFIXES)
 set(Wldap32_LIBRARY_SUFFIXES)
