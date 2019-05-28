@@ -14,7 +14,7 @@ variable `CMAKE_SYSTEM_VERSION`.
 
 .. note::
 
-  `CMAKE_SYSTEM_VERSION` must be specified `cmake -DCMAKE_SYSTEM_VERSION=...`.
+  `CMAKE_SYSTEM_VERSION` must be specified ``cmake -DCMAKE_SYSTEM_VERSION=...``.
   Otherwise, specify this before `project()` is called in `CMakeLists.txt`.
 
   Set `CMAKE_SYSTEM_VERSION` example:
@@ -117,9 +117,9 @@ if(DEFINED Wldap32_WINDOWS_SDK_VERSION)
   if(DEFINED Wldap32_TARGERT_ARCH)
     list(APPEND Wldap32_LIBRARY_SUFFIXES
       "Lib/${Wldap32_WINDOWS_SDK_VERSION}/um/${Wldap32_TARGERT_ARCH}")
-  endif(DEFINED Wldap32_TARGERT_ARCH)
+  endif()
 
-endif(DEFINED Wldap32_WINDOWS_SDK_VERSION)
+endif()
 
 find_path(Wldap32_INCLUDE_DIR
   NAMES Winldap.h
@@ -171,8 +171,7 @@ unset(Wldap32_LIBRARY_SUFFIXES)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Wldap32
   REQUIRED_VARS Wldap32_INCLUDE_DIR Wldap32_LIBRARY
-  VERSION_VAR Wldap32_VERSION
-)
+  VERSION_VAR Wldap32_VERSION)
 
 if(Wldap32_FOUND)
   set(Wldap32_INCLUDE_DIRS "${Wldap32_INCLUDE_DIR}")
@@ -183,8 +182,7 @@ if(Wldap32_FOUND)
     set_target_properties(Wldap32::Wldap32
       PROPERTIES
         IMPORTED_LOCATION ${Wldap32_LIBRARIES}
-        INTERFACE_INCLUDE_DIRECTORIES ${Wldap32_INCLUDE_DIR}
-    )
+        INTERFACE_INCLUDE_DIRECTORIES ${Wldap32_INCLUDE_DIR})
   endif()
 endif()
 
