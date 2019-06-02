@@ -69,6 +69,7 @@ endfunction()
 
 add_library(LDAP_SEARCH_LIB STATIC
   src/ldap/ldap_error.cpp
+  src/ldap/ldap_result.cpp
   src/ldap/ldap_system_error.cpp)
 
 add_target_definitions(LDAP_SEARCH_LIB)
