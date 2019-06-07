@@ -122,7 +122,7 @@ if(DEFINED Wldap32_WINDOWS_SDK_VERSION)
 endif()
 
 find_path(Wldap32_INCLUDE_DIR
-  NAMES Winldap.h
+  NAMES Winldap.h WinBer.h
   # Since the default Windows SDK directory exists in the search path,
   # HINTS is used to detect user-defined version libraries with priority.
   HINTS ${Wldap32_WINDOWS_SDK_DIR}
