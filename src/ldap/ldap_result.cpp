@@ -11,21 +11,11 @@ namespace tt4g
 namespace ldap
 {
 
-std::string make_error_messae(const tt4g::ldap::ldap_result_info &ldapResultInfo)
+std::string makeErrorMessage(const tt4g::ldap::ldap_result_info &ldapResultInfo)
 {
-    if (ldapResultInfo.ldap_system_error_code == 0) {
-        return ldapResultInfo.ec.message();
-    }
+    std::string message = ldapResultInfo.message;
 
-    // LDAP error code to message.
-    const char* systemMessage = ::ldap_err2stringA(ldapResultInfo.ldap_system_error_code);
-    if (systemMessage == nullptr) {
-        // NULL when invalid error code.
-        return ldapResultInfo.ec.message();
-    }
-
-    std::string message = ldapResultInfo.ec.message();
-    message.append(": ").append(systemMessage);
+    message.append(": ").append(ldapResultInfo.ec.message());
 
     return message;
 }
@@ -35,14 +25,14 @@ void outcome_throw_as_system_error_with_payload(
 {
     boost::outcome_v2::try_throw_std_exception_from_error(ldapResultInfo.ec);
 
-    if (ldapResultInfo.ldap_system_error_code == 0) {
+    if (ldapResultInfo.ldap_api_error_code == 0) {
         // LDAP API no error.
-        throw tt4g::ldap::ldap_error(ldapResultInfo.ec.message());
+        throw tt4g::ldap::ldap_error(makeErrorMessage(ldapResultInfo));
     } else {
         // LDAP API error.
         throw tt4g::ldap::ldap_system_error(
-                ldapResultInfo.ec.message(),
-                ldapResultInfo.ldap_system_error_code);
+                makeErrorMessage(ldapResultInfo),
+                ldapResultInfo.ldap_api_error_code);
     }
 }
 

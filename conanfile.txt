@@ -2,7 +2,6 @@
 boost/1.70.0@conan/stable
 
 [build_requires]
-catch2/2.5.0@bincrafters/stable
 
 [options]
 boost:shared=False

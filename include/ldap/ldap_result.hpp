@@ -22,11 +22,16 @@ struct ldap_result_info
     std::error_code ec;
 
     /**
+     * @brief Error reason message.
+     */
+    std::string message;
+
+    /**
      * @brief LDAP API error code.
      *
      * If LDAP API failed, set non 0, otherwise 0 (LDAP_SUCCESS).
      */
-    unsigned long ldap_system_error_code;
+    unsigned long ldap_api_error_code;
 
 };
 
@@ -36,9 +41,15 @@ struct ldap_result_info
  * @param ldapResultInfo ldap_result_info.
  * @return std::string message.
  */
-std::string make_error_messae(const tt4g::ldap::ldap_result_info &ldapResultInfo);
+std::string makeErrorMessage(const tt4g::ldap::ldap_result_info &ldapResultInfo);
 
-// Boost.Outcome throw custom error when invalid value access.
+// Boost.Outcome: convertion function for failure_info of boost::outcome_v2::result to std::error_code
+inline const std::error_code& make_error_code(const tt4g::ldap::ldap_result_info &ldapResultInfo)
+{
+    return ldapResultInfo.ec;
+}
+
+// Boost.Outcome: throw custom error when invalid value access.
 void outcome_throw_as_system_error_with_payload(
         tt4g::ldap::ldap_result_info ldapResultInfo);
 

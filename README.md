@@ -1,6 +1,6 @@
 # Overview
 
-LDAP search example.
+Winldap example.
 
 ## Warning
 
@@ -21,7 +21,6 @@ $ cmake --build .
 * Windows 10 SDK
 * Conan (optional)
 * Boost library (optional)
-* Catch2 (optional)
 
 ### CMake variables
 
@@ -29,14 +28,6 @@ $ cmake --build .
 
     Windows SDK version.
 
-* CATCH2_CMAKE_MODULE_PATH
-
-    The location of `Catch2.cmake` provided by Catch2.
-
 * LDAP_SEARCH_USING_CONAN
 
     If `ON`, install dependent libraries Boost and Catch2. The default is `ON`.
-
-* LDAP_SEARCH_BUILD_TEST
-
-    If `ON`, build test target. The default is `ON`.

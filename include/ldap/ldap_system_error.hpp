@@ -18,21 +18,32 @@ public:
      * @brief create object.
      *
      * @param what_arg Explanatory string.
-     * @param ldapSystemErrorCode Returns the LDAP error code from `LdapGetLastError()`.
+     * @param ldapApiErrorCode Returns the LDAP error code from `LdapGetLastError()`.
      */
     explicit ldap_system_error(
-            const std::string& what_arg, unsigned long ldapSystemErrorCode);
+            const std::string& what_arg, unsigned long ldapApiErrorCode);
 
     /**
      * @brief create object.
      *
      * @param what_arg Explanatory string.
-     * @param ldapSystemErrorCode Returns the LDAP error code from `LdapGetLastError()`.
+     * @param ldapApiErrorCode Returns the LDAP error code from `LdapGetLastError()`.
      */
     explicit ldap_system_error(
-            const char* what_arg, unsigned long ldapSystemErrorCode);
+            const char* what_arg, unsigned long ldapApiErrorCode);
 
     virtual ~ldap_system_error() noexcept override;
+
+    /**
+     * @brief Get LDAP API error code.
+     *
+     * @return LDAP API error code.
+     */
+    unsigned long getLdapApiErrorCode() const;
+
+private:
+
+    unsigned long ldapApiErrorCode_;
 
 };
 

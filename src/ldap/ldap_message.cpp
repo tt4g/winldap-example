@@ -15,6 +15,11 @@ ldap_message::ldap_message(std::unique_ptr<ldap_message_impl> impl)
 
 }
 
+ldap_message::~ldap_message()
+{
+
+}
+
 const ldap_message_impl& ldap_message::getImpl() const
 {
     return *(this->impl_);

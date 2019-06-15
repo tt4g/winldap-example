@@ -13,7 +13,10 @@ ldap_session_impl::ldap_session_impl(LDAP* session)
 
 ldap_session_impl::~ldap_session_impl()
 {
-    ::ldap_unbind_s(this->session_);
+    // ldap_init() returns nullptr if initialization failed.
+    if (this->session_ == nullptr) {
+        ::ldap_unbind_s(this->session_);
+    }
 }
 
 LDAP* ldap_session_impl::getSession() const

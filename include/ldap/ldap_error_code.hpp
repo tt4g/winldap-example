@@ -18,7 +18,12 @@ enum class ldap_error_code : int
     /**
      * @brief LDAP API error.
      */
-    LdapApiError = 1
+    LdapApiError = 0x01,
+
+    /**
+     * @brief invlid argument.
+     */
+    InvalidArgument = 0x0101
 
 };
 
@@ -39,6 +44,9 @@ public:
         switch (static_cast<ldap_error_code>(ev)) {
             case ldap_error_code::LdapApiError:
                 return "LDAP api error";
+
+            case ldap_error_code::InvalidArgument:
+                return "invalid argument";
         }
 
         return "unknown error";
@@ -53,9 +61,9 @@ const std::error_category& ldap_error_category()
     return ldapErrorCategory;
 }
 
-std::error_condition make_error_condition(tt4g::ldap::ldap_error_code ldapErrorCode)
+std::error_code make_ldap_error_code(tt4g::ldap::ldap_error_code ldapErrorCode)
 {
-    return std::error_condition(
+    return std::error_code(
             static_cast<int>(ldapErrorCode), tt4g::ldap::ldap_error_category());
 }
 

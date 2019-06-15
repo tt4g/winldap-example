@@ -4,16 +4,24 @@
 #include <windows.h>
 #include <winldap.h>
 
+#include <memory>
+
 namespace tt4g
 {
 namespace ldap
 {
 
+// forward declaration
+class ldap_session;
+// forward declaration
+
 class ldap_message_impl
 {
 public:
 
-    explicit ldap_message_impl(LDAPMessage* message);
+    explicit ldap_message_impl(
+            std::shared_ptr<ldap_session> session,
+            LDAPMessage* message);
 
     ~ldap_message_impl();
 
@@ -28,6 +36,8 @@ public:
     ldap_message_impl& operator=(ldap_message_impl&&) = default;
 
 private:
+
+    std::shared_ptr<ldap_session> session_;
 
     LDAPMessage* message_;
 

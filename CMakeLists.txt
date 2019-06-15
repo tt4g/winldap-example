@@ -21,7 +21,6 @@ endif()
 project(LDAP_SEARCH VERSION 1.0.0 LANGUAGES CXX)
 
 option(LDAP_SEARCH_USING_CONAN "Use conan to install dependent libraries" ON)
-option(LDAP_SEARCH_BUILD_TEST "Build test" ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -49,8 +48,6 @@ conan_cmake_run(
 
 # cmake-conan
 ################################################################################
-
-  set(CATCH2_CMAKE_MODULE_PATH ${CONAN_CMAKE_MODULE_PATH})
 endif()
 
 find_package(Boost 1.70.0 EXACT REQUIRED)
@@ -75,7 +72,8 @@ add_library(LDAP_SEARCH_LIB STATIC
   src/ldap/ldap_result.cpp
   src/ldap/ldap_session_impl.cpp
   src/ldap/ldap_session.cpp
-  src/ldap/ldap_system_error.cpp)
+  src/ldap/ldap_system_error.cpp
+  src/ldap/session_factory.cpp)
 
 add_target_definitions(LDAP_SEARCH_LIB)
 
@@ -89,15 +87,30 @@ target_link_libraries(LDAP_SEARCH_LIB
     Boost::boost
     Wldap32::Wldap32)
 
-add_executable(LDAP_SEARCH main.cpp)
+add_executable(LDAP_SEARCH_EXAMPLE
+  example/search/main.cpp
+  example/search/list_attributes.cpp)
 
-add_target_definitions(LDAP_SEARCH)
+add_target_definitions(LDAP_SEARCH_EXAMPLE)
 
-target_link_libraries(LDAP_SEARCH
+target_include_directories(LDAP_SEARCH_EXAMPLE
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/example)
+
+target_link_libraries(LDAP_SEARCH_EXAMPLE
   PUBLIC
     LDAP_SEARCH_LIB)
 
-if(LDAP_SEARCH_BUILD_TEST)
-  enable_testing()
-  add_subdirectory(test)
-endif()
+add_executable(LDAP_MODIFY_EXAMPLE
+  example/modify/main.cpp
+  example/modify/add_or_modify.cpp)
+
+add_target_definitions(LDAP_MODIFY_EXAMPLE)
+
+target_include_directories(LDAP_MODIFY_EXAMPLE
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/example)
+
+target_link_libraries(LDAP_MODIFY_EXAMPLE
+  PUBLIC
+    LDAP_SEARCH_LIB)

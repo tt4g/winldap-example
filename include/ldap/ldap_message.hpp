@@ -16,6 +16,8 @@ public:
 
     explicit ldap_message(std::unique_ptr<ldap_message_impl> impl);
 
+    ~ldap_message();
+
     ldap_message(const ldap_message&) = delete;
 
     ldap_message(ldap_message&&) = default;
