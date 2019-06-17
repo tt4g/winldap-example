@@ -4,6 +4,8 @@
 #include <windows.h>
 #include <winldap.h>
 
+#include <memory>
+
 namespace tt4g
 {
 namespace ldap
@@ -13,7 +15,9 @@ class ldap_session_impl
 {
 public:
 
-    explicit ldap_session_impl(LDAP* session);
+    explicit ldap_session_impl(
+            LDAP* session,
+            std::unique_ptr<SEC_WINNT_AUTH_IDENTITY_A> identity);
 
     ~ldap_session_impl();
 
@@ -30,6 +34,8 @@ public:
 private:
 
     LDAP* session_;
+
+    std::unique_ptr<SEC_WINNT_AUTH_IDENTITY_A> identity_;
 
 };
 

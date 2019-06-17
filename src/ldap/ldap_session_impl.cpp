@@ -1,12 +1,24 @@
 #include "ldap/ldap_session_impl.hpp"
 
+#include <utility>
+
 namespace tt4g
 {
 namespace ldap
 {
 
-ldap_session_impl::ldap_session_impl(LDAP* session)
-        : session_(session)
+// NOTE: The lifetime of SEC_WINNT_AUTH_IDENTITY_A should be longer than LDAP*.
+//
+// See:  https://docs.microsoft.com/en-us/windows/desktop/api/rpcdce/ns-rpcdce-_sec_winnt_auth_identity_a
+// > This structure must remain valid for the lifetime of the binding handle
+// > unless pointed to from the RPC_HTTP_TRANSPORT_CREDENTIALS or
+// > RPC_HTTP_TRANSPORT_CREDENTIALS_V2 structure.
+
+ldap_session_impl::ldap_session_impl(
+        LDAP* session,
+        std::unique_ptr<SEC_WINNT_AUTH_IDENTITY_A> identity)
+        : session_(session),
+          identity_(std::move(identity))
 {
 
 }

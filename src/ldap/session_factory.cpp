@@ -16,6 +16,27 @@ namespace ldap
 namespace
 {
 
+struct temp_session_holder__
+{
+
+    temp_session_holder__(LDAP* session)
+            : session(session)
+    {
+
+    }
+
+    ~temp_session_holder__()
+    {
+        // ldap_init() returns nullptr if initialization failed.
+        if (this->session) {
+            ::ldap_unbind_s(this->session);
+        }
+    }
+
+    LDAP* session;
+
+};
+
 ldap_result_info createinvalidArgumentInfo(const char* message)
 {
     return ldap_result_info {
@@ -89,23 +110,21 @@ ldap_result<std::unique_ptr<ldap_session>> session_factory::create(
                 createinvalidArgumentInfo("[session_factory] protocolVersion is invalid"));
     }
 
-    auto sessionImpl =
-            std::make_unique<tt4g::ldap::ldap_session_impl>(
-                    ::ldap_initA(
-                            const_cast<char *>(this->host_.c_str()), this->port_));
+    temp_session_holder__ sessionHolder(
+            ::ldap_initA(const_cast<char *>(this->host_.c_str()), this->port_));
 
-    if (sessionImpl->getSession() == nullptr) {
+    if (sessionHolder.session == nullptr) {
         return boost::outcome_v2::failure(
                 createLdapApiErrorInfo("[session_factory] ldap_init failed"));
     }
 
-    if (::ldap_set_option(sessionImpl->getSession(), LDAP_OPT_PROTOCOL_VERSION, &ldapVersion)) {
+    if (::ldap_set_option(sessionHolder.session, LDAP_OPT_PROTOCOL_VERSION, &ldapVersion)) {
         return boost::outcome_v2::failure(
                 createLdapApiErrorInfo(
                         "[session_factory] ldap_set_option LDAP_OPT_PROTOCOL_VERSION failed"));
     }
 
-    if (::ldap_set_option(sessionImpl->getSession(), LDAP_OPT_AUTO_RECONNECT, LDAP_OPT_ON)) {
+    if (::ldap_set_option(sessionHolder.session, LDAP_OPT_AUTO_RECONNECT, LDAP_OPT_ON)) {
         return boost::outcome_v2::failure(
                 createLdapApiErrorInfo(
                         "[session_factory] ldap_set_option LDAP_OPT_AUTO_RECONNECT failed"));
@@ -114,20 +133,27 @@ ldap_result<std::unique_ptr<ldap_session>> session_factory::create(
     LDAP_TIMEVAL connectionTimeout;
     connectionTimeout.tv_sec = 3;
     connectionTimeout.tv_usec = 0;
-    if (::ldap_connect(sessionImpl->getSession(), &connectionTimeout)) {
+    if (::ldap_connect(sessionHolder.session, &connectionTimeout)) {
         return boost::outcome_v2::failure(
                 createLdapApiErrorInfo(
                         "[session_factory] ldap_connect failed"));
     }
 
-    SEC_WINNT_AUTH_IDENTITY_A identity;
-    identity.User = reinterpret_cast<unsigned char *>(const_cast<char *>(user.data()));
-    identity.UserLength = static_cast<unsigned long>(user.size());
-    identity.Domain = reinterpret_cast<unsigned char *>(const_cast<char *>(domain.data()));
-    identity.DomainLength = static_cast<unsigned long>(domain.size());
-    identity.Password = reinterpret_cast<unsigned char *>(const_cast<char *>(password.data()));
-    identity.PasswordLength = static_cast<unsigned long>(password.size());
-    identity.Flags = SEC_WINNT_AUTH_IDENTITY_ANSI;
+    auto identity = std::make_unique<SEC_WINNT_AUTH_IDENTITY_A>();
+    identity->User = reinterpret_cast<unsigned char *>(const_cast<char *>(user.data()));
+    identity->UserLength = static_cast<unsigned long>(user.size());
+    identity->Domain = reinterpret_cast<unsigned char *>(const_cast<char *>(domain.data()));
+    identity->DomainLength = static_cast<unsigned long>(domain.size());
+    identity->Password = reinterpret_cast<unsigned char *>(const_cast<char *>(password.data()));
+    identity->PasswordLength = static_cast<unsigned long>(password.size());
+    identity->Flags = SEC_WINNT_AUTH_IDENTITY_ANSI;
+
+    // The lifetime of SEC_WINNT_AUTH_IDENTITY_A should be longer than LDAP*.
+    // See:  https://docs.microsoft.com/en-us/windows/desktop/api/rpcdce/ns-rpcdce-_sec_winnt_auth_identity_a
+    auto sessionImpl =
+            std::make_unique<tt4g::ldap::ldap_session_impl>(
+                    sessionHolder.session, std::move(identity));
+    sessionHolder.session = nullptr;
 
     // if (ldap_bind_sA(sessionImpl->getSession(), nullptr,
     //         reinterpret_cast<char *>(&identity), LDAP_AUTH_SIMPLE)) {
@@ -139,7 +165,7 @@ ldap_result<std::unique_ptr<ldap_session>> session_factory::create(
 
     // Can use LDAP_AUTH_SIMPLE, LDAP_AUTH_DIGEST, LDAP_AUTH_DPA, etc.
     if (ldap_bind_sA(sessionImpl->getSession(), nullptr,
-            reinterpret_cast<char *>(&identity), LDAP_AUTH_DIGEST)) {
+            reinterpret_cast<char *>(identity.get()), LDAP_AUTH_DIGEST)) {
 
         return boost::outcome_v2::failure(
                 createLdapApiErrorInfo(
