@@ -124,6 +124,10 @@ ldap_result<std::unique_ptr<ldap_session>> session_factory::create(
                         "[session_factory] ldap_set_option LDAP_OPT_PROTOCOL_VERSION failed"));
     }
 
+    // NOTE: Active Directory disconnects the TCP connection if it exceeds the
+    //       time specified by `MaxConnIdleTime`.
+    //       If `LDAP_OPT_AUTO_RECONNECT` is set to `LDAP_OPT_ON`, it will
+    //       automatically retry `ldap_init`, `ldap_connect` and `ldap_bind`.
     if (::ldap_set_option(sessionHolder.session, LDAP_OPT_AUTO_RECONNECT, LDAP_OPT_ON)) {
         return boost::outcome_v2::failure(
                 createLdapApiErrorInfo(
