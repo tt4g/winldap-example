@@ -49,7 +49,7 @@ Result variables
 This module will set the following variables if found:
 
 ``Wldap32_INCLUDE_DIRS``
-  Where to find sqlite3.h, etc.
+  Where to find WinBer.h, Winldap.h, etc.
 
 ``Wldap32_LIBRARIES``
   The libraries to link against to use Wldap32.
@@ -122,7 +122,7 @@ if(DEFINED Wldap32_WINDOWS_SDK_VERSION)
 endif()
 
 find_path(Wldap32_INCLUDE_DIR
-  NAMES Winldap.h WinBer.h
+  NAMES WinBer.h Winldap.h
   # Since the default Windows SDK directory exists in the search path,
   # HINTS is used to detect user-defined version libraries with priority.
   HINTS ${Wldap32_WINDOWS_SDK_DIR}
